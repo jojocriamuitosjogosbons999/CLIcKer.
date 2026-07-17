@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ CLICKER SUPREMO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@700;900&display=swap');
+
+:root {
+  --bg: #0a0010;
+  --bg2: #110022;
+  --card: #130020;
+  --border: #3a0060;
+  --accent: #cc00ff;
+  --accent2: #ff00cc;
+  --yellow: #ffdd00;
+  --green: #00ffaa;
+  --orange: #ff6600;
+  --red: #ff2244;
+  --blue: #00ccff;
+  --text: #f0d0ff;
+  --sub: #886699;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── BG GRID ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--border)22 1px, transparent 1px),
+    linear-gradient(90deg, var(--border)22 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: gridPulse 6s ease-in-out infinite;
+}
+@keyframes gridPulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+
+/* ── SCANLINE ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom, transparent 0, transparent 3px, #00000018 3px, #00000018 4px
+  );
+}
+
+.wrap { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 1rem; }
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  padding: 1.2rem 0 .5rem;
+}
+header h1 {
+  font-family: 'Boogaloo', cursive;
+  font-size: clamp(2rem, 7vw, 3.8rem);
+  color: var(--accent);
+  text-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent2), 4px 4px 0 #330044;
+  letter-spacing: 3px;
+  animation: titleWobble 3s ease-in-out infinite;
+}
+@keyframes titleWobble { 0%,100%{transform:rotate(-1deg)} 50%{transform:rotate(1deg)} }
+header p { font-size: .75rem; color: var(--sub); letter-spacing: 3px; margin-top: .3rem; }
+
+/* ── SCORE DISPLAY ── */
+.score-area {
+  text-align: center;
+  margin: .8rem 0;
+  position: relative;
+}
+.score-num {
+  font-family: 'Boogaloo', cursive;
+  font-size: clamp(3rem, 12vw, 6rem);
+  color: var(--yellow);
+  text-shadow: 0 0 20px var(--yellow)88, 3px 3px 0 #665500;
+  line-height: 1;
+  transition: transform .08s;
+  display: inline-block;
+}
+.score-num.pop { animation: scorePop .15s cubic-bezier(.34,1.56,.64,1); }
+@keyframes scorePop { 0%{transform:scale(1)} 50%{transform:scale(1.18)} 100%{transform:scale(1)} }
+.score-label { font-size: .7rem; color: var(--sub); letter-spacing: 4px; margin-top: .1rem; }
+.cps-display {
+  font-size: .65rem; color: var(--accent); letter-spacing: 2px;
+  margin-top: .2rem; font-weight: 700;
+}
+
+/* ── ACTIVE BOOSTS STRIP ── */
+.active-strip {
+  display: flex; gap: .4rem; flex-wrap: wrap; justify-content: center;
+  min-height: 32px; margin: .4rem 0;
+}
+.active-chip {
+  font-size: .55rem; font-weight: 700;
+  padding: .2rem .6rem; border-radius: 20px;
+  border: 2px solid; letter-spacing: 1px;
+  animation: chipIn .3s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap;
+}
+@keyframes chipIn { from{transform:scale(0)} to{transform:scale(1)} }
+
+/* ── MAIN CLICK BUTTON ── */
+.clicker-zone {
+  display: flex; justify-content: center; margin: .8rem 0 1rem;
+}
+.big-btn {
+  width: clamp(160px, 35vw, 220px);
+  height: clamp(160px, 35vw, 220px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #ff44ff, #880088);
+  border: 6px solid var(--accent);
+  box-shadow: 0 0 40px var(--accent)88, 0 0 80px var(--accent2)44, inset 0 0 30px #00000044;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  transition: transform .08s, box-shadow .08s;
+  position: relative; overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.big-btn::before {
+  content: '';
+  position: absolute; top: 12%; left: 18%; width: 35%; height: 20%;
+  background: #ffffff33; border-radius: 50%; transform: rotate(-20deg);
+  pointer-events: none;
+}
+.big-btn:hover { box-shadow: 0 0 60px var(--accent), 0 0 100px var(--accent2)66, inset 0 0 30px #00000044; }
+.big-btn:active { transform: scale(.92); box-shadow: 0 0 20px var(--accent)44; }
+.big-btn .btn-emoji { font-size: clamp(3rem, 8vw, 4.5rem); pointer-events: none; transition: transform .1s; }
+.big-btn:active .btn-emoji { transform: scale(.85); }
+.big-btn .btn-label {
+  font-family: 'Boogaloo', cursive; font-size: clamp(.8rem, 2.5vw, 1.1rem);
+  color: #fff; letter-spacing: 2px; pointer-events: none;
+  text-shadow: 0 0 10px #fff;
+}
+.big-btn .per-click {
+  font-size: .6rem; color: #ffaaff; letter-spacing: 1px; pointer-events: none;
+}
+
+/* ── CLICK EFFECT ── */
+.click-fx {
+  position: fixed; pointer-events: none; z-index: 200;
+  font-family: 'Boogaloo', cursive; font-weight: 700;
+  animation: fxFly .7s ease-out forwards;
+}
+@keyframes fxFly {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+}
+
+/* ── BOOST GRID ── */
+.section-title {
+  font-family: 'Boogaloo', cursive; font-size: 1.2rem;
+  color: var(--accent2); letter-spacing: 3px;
+  text-align: center; margin: .8rem 0 .5rem;
+  text-shadow: 0 0 15px var(--accent2);
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+}
+.section-title::before, .section-title::after {
+  content: ''; flex: 1; height: 2px;
+  background: linear-gradient(to right, transparent, var(--accent2)88, transparent);
+}
+
+.boost-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: .6rem;
+}
+.boost-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: .75rem .7rem;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+  overflow: hidden;
+}
+.boost-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, #ffffff08, transparent 60%);
+  pointer-events: none;
+}
+.boost-card:hover:not(.locked) {
+  border-color: var(--accent);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 20px var(--accent)44;
+}
+.boost-card:active:not(.locked) { transform: scale(.96); }
+.boost-card.locked { opacity: .4; cursor: not-allowed; filter: grayscale(.5); }
+.boost-card.owned { border-color: var(--green); background: #001a0e; }
+.boost-card.owned::after {
+  content: 'ATIVO';
+  position: absolute; top: 6px; right: 8px;
+  font-size: .38rem; color: var(--green); font-weight: 700; letter-spacing: 2px;
+}
+
+.boost-icon { font-size: 1.8rem; margin-bottom: .3rem; display: block; }
+.boost-name { font-size: .62rem; font-weight: 900; color: var(--text); margin-bottom: .15rem; letter-spacing: 1px; }
+.boost-desc { font-size: .52rem; color: var(--sub); line-height: 1.4; margin-bottom: .35rem; }
+.boost-cost {
+  font-size: .65rem; font-weight: 700;
+  display: inline-flex; align-items: center; gap: .25rem;
+}
+.boost-mult {
+  position: absolute; top: 7px; left: 8px;
+  font-size: .38rem; font-weight: 700; letter-spacing: 1px;
+  background: var(--accent)33; padding: .1rem .4rem; border-radius: 8px;
+}
+
+/* ── MILESTONES ── */
+.milestone-list {
+  display: flex; flex-direction: column; gap: .4rem; margin-top: .5rem;
+}
+.milestone-row {
+  display: flex; align-items: center; gap: .7rem;
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 10px; padding: .45rem .75rem;
+  transition: border-color .3s;
+}
+.milestone-row.done { border-color: var(--green); background: #001a0e; }
+.milestone-icon { font-size: 1.2rem; }
+.milestone-text { flex: 1; font-size: .58rem; color: var(--sub); }
+.milestone-text strong { color: var(--text); }
+.milestone-reward { font-size: .58rem; color: var(--yellow); font-weight: 700; }
+.milestone-check { font-size: 1rem; }
+
+/* ── STATS BAR ── */
+.stats-row {
+  display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center;
+  margin: .6rem 0;
+}
+.stat-chip {
+  background: var(--card); border: 2px solid var(--border); border-radius: 10px;
+  padding: .35rem .7rem; text-align: center;
+}
+.stat-val { font-family: 'Boogaloo', cursive; font-size: 1rem; }
+.stat-label { font-size: .42rem; color: var(--sub); letter-spacing: 1px; }
+
+/* ── NOTIF TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 20px; z-index: 300;
+  background: var(--card); border: 2px solid var(--accent);
+  font-size: .65rem; font-weight: 700; color: var(--accent);
+  padding: .55rem 1rem; border-radius: 12px;
+  box-shadow: 0 0 20px var(--accent)44;
+  transform: translateX(calc(100% + 30px));
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  max-width: 220px; letter-spacing: 1px;
+}
+.toast.show { transform: translateX(0); }
+
+/* ── COMBO ── */
+.combo-display {
+  text-align: center; font-family: 'Boogaloo', cursive;
+  font-size: 1rem; height: 28px;
+  letter-spacing: 2px;
+}
+.combo-display.active { color: var(--orange); text-shadow: 0 0 15px var(--orange); animation: comboPulse .3s ease-in-out; }
+@keyframes comboPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+footer { text-align: center; padding: 1.5rem; font-size: .58rem; color: var(--border); letter-spacing: 2px; position: relative; z-index: 2; }
+
+/* ── ASSISTIR VÍDEO BTN ── */
+.btn-video {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: 'Boogaloo', cursive; font-size: 1rem;
+  padding: .55rem 1.4rem;
+  background: linear-gradient(135deg, #ff2200, #ff7700);
+  color: #fff; border: none; border-radius: 12px;
+  cursor: pointer; letter-spacing: 2px;
+  box-shadow: 0 0 24px #ff440066, 0 5px 0 #991100;
+  text-decoration: none;
+  transition: all .12s;
+  animation: videoBtnPulse 2s ease-in-out infinite;
+  position: relative; overflow: hidden;
+  margin-top: .5rem;
+}
+.btn-video::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #ffffff22 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: videoShine 3s ease-in-out infinite;
+}
+@keyframes videoShine { 0%,70%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
+@keyframes videoBtnPulse {
+  0%,100%{ box-shadow: 0 0 24px #ff440066, 0 5px 0 #991100; }
+  50%    { box-shadow: 0 0 40px #ff4400bb, 0 5px 0 #991100; }
+}
+.btn-video:hover { transform: scale(1.07) translateY(-3px); filter: brightness(1.15); }
+.btn-video:active { transform: translateY(5px); box-shadow: 0 0 10px #ff440033, 0 0px 0 #991100; }
+.btn-video .play-tri {
+  width: 0; height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 14px solid #fff;
+  flex-shrink: 0;
+}
+
+/* ── PLANTA LINK ── */
+.btn-planta {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: 'Boogaloo', cursive; font-size: 1rem;
+  padding: .55rem 1.4rem;
+  background: linear-gradient(135deg, #006622, #00cc44);
+  color: #fff; border: none; border-radius: 12px;
+  cursor: pointer; letter-spacing: 2px;
+  box-shadow: 0 0 24px #00ff4466, 0 5px 0 #003311;
+  text-decoration: none;
+  transition: all .12s;
+  margin-top: .5rem;
+}
+.btn-planta:hover { transform: scale(1.07) translateY(-3px); filter: brightness(1.15); }
+.btn-planta:active { transform: translateY(5px); box-shadow: 0 0 10px #00ff4422, 0 0px 0 #003311; }
+
+
+/* == ULTRA ABANDONADO == */
+:root {
+  --bg: #020108;
+  --bg2: #030110;
+  --card: #04020c;
+  --border: #0f0520;
+  --accent: #550077;
+  --accent2: #440055;
+  --yellow: #665500;
+  --green: #003322;
+  --orange: #441100;
+  --red: #440011;
+  --blue: #003344;
+  --text: #3a2844;
+  --sub: #1e1228;
+}
+
+/* Filtro geral deteriorado */
+body {
+  filter: saturate(.25) brightness(.55) contrast(1.1) !important;
+}
+
+/* Rachaduras SVG inline via pseudo-elementos */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  background-image:
+    /* Rachadura principal diagonal */
+    linear-gradient(128deg, transparent 0%, transparent 42%, rgba(0,0,0,.95) 42.2%, rgba(255,255,255,.08) 42.4%, transparent 42.6%, transparent 58%, rgba(0,0,0,.9) 58.2%, rgba(255,255,255,.06) 58.4%, transparent 58.6%, transparent 100%),
+    /* Rachadura secundária */
+    linear-gradient(75deg, transparent 0%, transparent 65%, rgba(0,0,0,.8) 65.1%, rgba(255,255,255,.05) 65.3%, transparent 65.5%, transparent 100%),
+    /* Riscos menores */
+    linear-gradient(160deg, transparent 20%, transparent 30%, rgba(0,0,0,.6) 30.1%, transparent 30.3%, transparent 100%),
+    linear-gradient(40deg, transparent 50%, transparent 68%, rgba(0,0,0,.5) 68.1%, transparent 68.3%, transparent 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Scanlines pesadas */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,.35) 0px, rgba(0,0,0,.35) 1px,
+    transparent 1px, transparent 3px
+  );
+}
+
+/* Vinheta pesadíssima */
+#vignette-abandoned {
+  position: fixed; inset: 0; z-index: 9990; pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    transparent 20%,
+    rgba(0,0,0,.5) 50%,
+    rgba(0,0,0,.92) 80%,
+    rgba(0,0,0,.98) 100%
+  );
+}
+
+/* Canto quebrado */
+#corner-break {
+  position: fixed; top: 0; right: 0; z-index: 9997; pointer-events: none;
+  width: 200px; height: 200px;
+  background:
+    linear-gradient(225deg, rgba(0,0,0,.98) 0%, rgba(0,0,0,.98) 35%, transparent 36%),
+    linear-gradient(210deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.7) 28%, transparent 29%),
+    linear-gradient(240deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.5) 22%, transparent 23%);
+}
+#corner-break2 {
+  position: fixed; bottom: 0; left: 0; z-index: 9997; pointer-events: none;
+  width: 150px; height: 150px;
+  background: linear-gradient(45deg, rgba(0,0,0,.95) 0%, rgba(0,0,0,.95) 30%, transparent 31%);
+}
+
+/* Manchas de umidade */
+.stain {
+  position: fixed; border-radius: 40% 60% 55% 45% / 50% 45% 55% 50%;
+  pointer-events: none; z-index: 9985;
+  background: radial-gradient(ellipse at center,
+    rgba(30,10,50,.7) 0%,
+    rgba(20,5,35,.4) 40%,
+    transparent 70%
+  );
+  filter: blur(12px);
+  animation: stainPulse 8s ease-in-out infinite;
+}
+@keyframes stainPulse { 0%,100%{opacity:.6} 50%{opacity:.9} }
+
+/* Poeira */
+.dust {
+  position: fixed; border-radius: 50%;
+  background: rgba(160,130,190,.15);
+  pointer-events: none; z-index: 9980;
+  animation: dustFloat linear infinite;
+}
+@keyframes dustFloat {
+  0%{opacity:0;transform:translate(0,0) rotate(0deg);}
+  10%{opacity:.7;}
+  90%{opacity:.2;}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(540deg);}
+}
+
+/* Riscos na tela */
+.scratch {
+  position: fixed; pointer-events: none; z-index: 9995;
+  background: rgba(255,255,255,.04);
+  transform-origin: top left;
+}
+
+/* Glitch pesado */
+@keyframes heavyGlitch {
+  0%,88%,100% { transform: none; filter: none; }
+  89% { transform: translateX(-3px) skewX(1deg); filter: hue-rotate(90deg) saturate(3); }
+  90% { transform: translateX(3px); filter: invert(.15); clip-path: inset(30% 0 20% 0); }
+  91% { transform: none; filter: none; clip-path: none; }
+  94% { transform: translateX(-2px) scaleY(1.01); filter: hue-rotate(180deg) saturate(2); }
+  95% { transform: none; filter: none; }
+}
+body { animation: heavyGlitch 7s ease-in-out infinite; }
+
+/* Botão principal deteriorado */
+#main-btn {
+  filter: saturate(.2) brightness(.5) !important;
+  box-shadow: none !important;
+  border: 1px dashed #220033 !important;
+  animation: btnFlicker 6s ease-in-out infinite !important;
+}
+@keyframes btnFlicker {
+  0%,90%,100%{opacity:.7;filter:saturate(.2) brightness(.5);}
+  91%{opacity:.3;filter:saturate(.1) brightness(.3);}
+  92%{opacity:.8;filter:saturate(.3) brightness(.6);}
+  95%{opacity:.4;filter:saturate(.05) brightness(.2);}
+  96%{opacity:.7;filter:saturate(.2) brightness(.5);}
+}
+
+/* Cards boost deteriorados */
+.boost-card {
+  filter: saturate(.15) brightness(.45) !important;
+  border: 1px dashed #0a0515 !important;
+  opacity: .75 !important;
+}
+.boost-card.locked { opacity: .3 !important; }
+.boost-card:not(.locked):hover {
+  filter: saturate(.35) brightness(.6) !important;
+  opacity: .9 !important;
+}
+
+/* Score apagado */
+#score-display, [id*="score"], .score {
+  color: #1a1020 !important;
+  text-shadow: 0 0 8px #22003344 !important;
+  animation: scoreFlicker 9s ease-in-out infinite !important;
+}
+@keyframes scoreFlicker {
+  0%,85%,100%{opacity:.6;}
+  86%{opacity:.2;}
+  87%{opacity:.7;}
+  92%{opacity:.35;}
+  93%{opacity:.6;}
+}
+
+/* Header/título */
+header, h1, .title {
+  filter: blur(.4px) saturate(.2) brightness(.5) !important;
+}
+
+/* Linha de erro no topo */
+#error-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9996;
+  background: #0a0005; border-bottom: 1px solid #1a0022;
+  color: #220033; font-family: 'Share Tech Mono', monospace;
+  font-size: .45rem; padding: .2rem .6rem; letter-spacing: 2px;
+  display: flex; justify-content: space-between;
+  pointer-events: none;
+}
+
+/* Footer */
+footer {
+  color: #0d0818 !important;
+  filter: blur(.8px) !important;
+  opacity: .3 !important;
+}
+
+/* Texto corrompido aleatorio */
+@keyframes textCorrupt {
+  0%,91%,100%{filter:none;transform:none;letter-spacing:inherit;}
+  92%{filter:hue-rotate(90deg);transform:skewX(2deg);letter-spacing:.1em;}
+  93%{filter:none;transform:none;}
+  96%{filter:invert(.1);transform:skewX(-1deg);}
+  97%{filter:none;transform:none;}
+}
+
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <h1>⚡ CLICKER SUPREMO</h1>
+    <p>CLIQUE • COLETE • DOMINE</p>
+    <div style="display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:.7rem;">
+      <a class="btn-video"
+         href="https://www.youtube.com/watch?v=WEJlgXznwcI"
+         target="_blank"
+         onclick="sfx('wen')">
+        <span class="play-tri"></span>
+        ASSISTIR VÍDEO
+      </a>
+      <a class="btn-planta"
+         href="./planta-maluca-v7.html"
+         onclick="sfx('planta')">
+        🌿 ABRIR PLANTA
+      </a>
+    </div>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-chip">
+      <div class="stat-val" style="color:var(--yellow)" id="statTotal">0</div>
+      <div class="stat-label">TOTAL CLIQUES</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-val" style="color:var(--accent)" id="statBoosts">0</div>
+      <div class="stat-label">BOOSTS ATIVOS</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-val" style="color:var(--green)" id="statMulti">×1</div>
+      <div class="stat-label">MULTIPLICADOR</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-val" style="color:var(--orange)" id="statCps">0</div>
+      <div class="stat-label">PONTOS/SEG</div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div class="score-area">
+    <div class="score-num" id="scoreNum">0</div>
+    <div class="score-label">PONTOS</div>
+    <div class="cps-display" id="cpsDisplay">+1 por clique</div>
+  </div>
+
+  <!-- COMBO -->
+  <div class="combo-display" id="comboDisplay"></div>
+
+  <!-- ACTIVE BOOSTS STRIP -->
+  <div class="active-strip" id="activeStrip"></div>
+
+  <!-- CLICK BUTTON -->
+  <div class="clicker-zone">
+    <button class="big-btn" id="bigBtn" onclick="doClick(event)">
+      <span class="btn-emoji" id="btnEmoji">👆</span>
+      <span class="btn-label">CLIQUE!</span>
+      <span class="per-click" id="perClickLabel">+1 por clique</span>
+    </button>
+  </div>
+
+  <!-- BOOSTS -->
+  <div class="section-title">🚀 BOOSTS</div>
+  <div class="boost-grid" id="boostGrid"></div>
+
+  <!-- MILESTONES -->
+  <div class="section-title" style="margin-top:1.2rem">🏆 CONQUISTAS</div>
+  <div class="milestone-list" id="milestoneList"></div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">toast</div>
+
+<script>
+// ================================
+// STATE
+// ================================
+let score = 0;
+let totalClicks = 0;
+let clickPower = 1;          // points per click
+let autoPerSec = 0;          // auto points per second
+let globalMult = 1;          // global multiplier
+let activeBoosts = {};       // id → expiry timestamp (0 = permanent)
+let comboCount = 0;
+let comboTimer = null;
+let lastClickTime = 0;
+
+// ================================
+// BOOST DEFINITIONS  (17+)
+// ================================
+const BOOSTS = [
+  // PERMANENT UPGRADES
+  {
+    id: 'double_click', name: 'CLIQUE DUPLO', icon: '✌️',
+    desc: '+1 ponto extra por clique, para sempre.',
+    cost: 10, type: 'perm',
+    color: '#ff44cc', borderColor: '#880055',
+    effect: () => { clickPower += 1; },
+    label: '+1/CLIQUE',
+  },
+  {
+    id: 'triple_click', name: 'CLIQUE TRIPLO', icon: '🤟',
+    desc: '+2 pontos extras por clique.',
+    cost: 50, type: 'perm', requires: 'double_click',
+    color: '#ff44cc', borderColor: '#880055',
+    effect: () => { clickPower += 2; },
+    label: '+2/CLIQUE',
+  },
+  {
+    id: 'power_fist', name: 'PUNHO SAGRADO', icon: '👊',
+    desc: '+5 pontos por clique. BOM DEMAIS.',
+    cost: 200, type: 'perm', requires: 'triple_click',
+    color: '#ff6600', borderColor: '#883300',
+    effect: () => { clickPower += 5; },
+    label: '+5/CLIQUE',
+  },
+  {
+    id: 'mega_fist', name: 'MEGA PUNHO', icon: '🦾',
+    desc: '+15 pontos por clique. ABSURDO.',
+    cost: 1000, type: 'perm', requires: 'power_fist',
+    color: '#ff6600', borderColor: '#883300',
+    effect: () => { clickPower += 15; },
+    label: '+15/CLIQUE',
+  },
+  {
+    id: 'ultra_fist', name: 'ULTRA PUNHO ∞', icon: '🔥',
+    desc: '+50 pontos por clique. INFINITO.',
+    cost: 5000, type: 'perm', requires: 'mega_fist',
+    color: '#ff2200', borderColor: '#880000',
+    effect: () => { clickPower += 50; },
+    label: '+50/CLIQUE',
+  },
+  // AUTO-CLICKERS
+  {
+    id: 'auto1', name: 'AUTO-CLIQUE I', icon: '🤖',
+    desc: '+1 ponto por segundo automaticamente.',
+    cost: 30, type: 'perm',
+    color: '#00ccff', borderColor: '#006688',
+    effect: () => { autoPerSec += 1; },
+    label: '+1/SEG',
+  },
+  {
+    id: 'auto2', name: 'AUTO-CLIQUE II', icon: '🤖🤖',
+    desc: '+5 pontos por segundo.',
+    cost: 150, type: 'perm', requires: 'auto1',
+    color: '#00ccff', borderColor: '#006688',
+    effect: () => { autoPerSec += 5; },
+    label: '+5/SEG',
+  },
+  {
+    id: 'auto3', name: 'FÁBRICA DE CLIQUES', icon: '🏭',
+    desc: '+20 pontos por segundo.',
+    cost: 800, type: 'perm', requires: 'auto2',
+    color: '#00ccff', borderColor: '#006688',
+    effect: () => { autoPerSec += 20; },
+    label: '+20/SEG',
+  },
+  {
+    id: 'auto4', name: 'SERVIDOR QUÂNTICO', icon: '🌀',
+    desc: '+100 pontos por segundo.',
+    cost: 5000, type: 'perm', requires: 'auto3',
+    color: '#00ccff', borderColor: '#006688',
+    effect: () => { autoPerSec += 100; },
+    label: '+100/SEG',
+  },
+  // MULTIPLIERS
+  {
+    id: 'mult2', name: 'MULTIPLICADOR ×2', icon: '✖️',
+    desc: 'Dobra todos os pontos por 30 segundos.',
+    cost: 100, type: 'temp', duration: 30,
+    color: '#ffdd00', borderColor: '#886600',
+    effect: () => { applyTempMult(2, 30); },
+    label: '×2 / 30s',
+  },
+  {
+    id: 'mult3', name: 'MULTIPLICADOR ×3', icon: '🔢',
+    desc: 'Triplica todos os pontos por 20 segundos.',
+    cost: 300, type: 'temp', duration: 20,
+    color: '#ffdd00', borderColor: '#886600',
+    effect: () => { applyTempMult(3, 20); },
+    label: '×3 / 20s',
+  },
+  {
+    id: 'mult5', name: 'MULTIPLICADOR ×5', icon: '💥',
+    desc: '×5 em tudo por 15 segundos.',
+    cost: 800, type: 'temp', duration: 15,
+    color: '#ffdd00', borderColor: '#886600',
+    effect: () => { applyTempMult(5, 15); },
+    label: '×5 / 15s',
+  },
+  {
+    id: 'mult10', name: 'MODO DEUS ×10', icon: '👑',
+    desc: '×10 por 10 segundos. LOUCO.',
+    cost: 3000, type: 'temp', duration: 10,
+    color: '#ff4400', borderColor: '#881100',
+    effect: () => { applyTempMult(10, 10); },
+    label: '×10 / 10s',
+  },
+  // SPECIAL / FUNNY
+  {
+    id: 'coffee', name: 'CAFÉ TURBO', icon: '☕',
+    desc: 'Clique 2× mais rápido por 20 segundos.',
+    cost: 80, type: 'temp', duration: 20,
+    color: '#cc6600', borderColor: '#663300',
+    effect: () => { startTempEffect('coffee', 20, 'CAFÉ TURBO ativo! Clique mais rápido!'); },
+    label: 'SPEED 20s',
+  },
+  {
+    id: 'lucky', name: 'DADO DA SORTE', icon: '🎲',
+    desc: '10% de chance de ganhar 10× por clique.',
+    cost: 150, type: 'perm',
+    color: '#00ff88', borderColor: '#006633',
+    effect: () => { /* handled in doClick */ },
+    label: '10% LUCKY',
+  },
+  {
+    id: 'critical', name: 'CLIQUE CRÍTICO', icon: '💢',
+    desc: '15% de chance de +100 pontos de uma vez.',
+    cost: 400, type: 'perm',
+    color: '#ff2244', borderColor: '#880011',
+    effect: () => { /* handled in doClick */ },
+    label: '15% CRIT',
+  },
+  {
+    id: 'combo', name: 'SISTEMA COMBO', icon: '🔥',
+    desc: 'Cliques rápidos acumulam combo multiplicador.',
+    cost: 250, type: 'perm',
+    color: '#ff8800', borderColor: '#884400',
+    effect: () => { /* handled in doClick */ },
+    label: 'COMBO+',
+  },
+  {
+    id: 'bank', name: 'BANCO DE PONTOS', icon: '🏦',
+    desc: 'Ganha 50 pontos imediatamente. Boa?',
+    cost: 25, type: 'instant',
+    color: '#88ff44', borderColor: '#336600',
+    effect: () => { addScore(50); toast('🏦 +50 pontos do banco!'); },
+    label: '+50 AGORA',
+  },
+  {
+    id: 'jackpot', name: 'JACKPOT!', icon: '🎰',
+    desc: 'Ganhe entre 100 e 500 pontos aleatórios!',
+    cost: 200, type: 'instant',
+    color: '#ff4488', borderColor: '#881133',
+    effect: () => {
+      const v = 100 + Math.floor(Math.random() * 401);
+      addScore(v); toast(`🎰 JACKPOT! +${v} pontos!`);
+    },
+    label: '100-500 PTS',
+  },
+  {
+    id: 'storm', name: 'TEMPESTADE', icon: '⛈️',
+    desc: '+10/seg por 15 segundos. A chuva caiu.',
+    cost: 350, type: 'temp', duration: 15,
+    color: '#4466ff', borderColor: '#112288',
+    effect: () => { startTempAuto(10, 15); },
+    label: '+10/seg 15s',
+  },
+  {
+    id: 'rainbow', name: 'ARCO-ÍRIS', icon: '🌈',
+    desc: 'Todos os efeitos temporários +5s de duração.',
+    cost: 500, type: 'perm',
+    color: '#ff44ff', borderColor: '#881188',
+    effect: () => { RAINBOW_BONUS += 5; toast('🌈 +5s em todos os boosts temporários!'); },
+    label: '+5s DURAÇÃO',
+  },
+  {
+    id: 'ghost', name: 'CLIQUE FANTASMA', icon: '👻',
+    desc: 'Auto-clique secreto a cada 2 segundos.',
+    cost: 600, type: 'perm',
+    color: '#aaaaff', borderColor: '#444488',
+    effect: () => { startGhostClick(); },
+    label: 'AUTO 2s',
+  },
+];
+
+let RAINBOW_BONUS = 0;
+let tempMultExpiry = 0;
+let tempMultVal = 1;
+let tempAutoIv = null;
+let ghostIv = null;
+let owned = new Set();
+
+// ================================
+// MILESTONES
+// ================================
+const MILESTONES = [
+  { id: 'm10',    goal: 10,     label: '<strong>10 pontos</strong>',       reward: '+5 pontos bônus',    bonus: () => addScore(5) },
+  { id: 'm50',    goal: 50,     label: '<strong>50 pontos</strong>',       reward: '+20 pontos bônus',   bonus: () => addScore(20) },
+  { id: 'm100',   goal: 100,    label: '<strong>100 pontos</strong>',      reward: '+50 pontos bônus',   bonus: () => addScore(50) },
+  { id: 'm500',   goal: 500,    label: '<strong>500 pontos</strong>',      reward: 'Clique +2 permanente', bonus: () => { clickPower += 2; } },
+  { id: 'm1k',    goal: 1000,   label: '<strong>1.000 pontos</strong>',    reward: '+200 pontos bônus',  bonus: () => addScore(200) },
+  { id: 'm5k',    goal: 5000,   label: '<strong>5.000 pontos</strong>',    reward: '+500 pontos bônus',  bonus: () => addScore(500) },
+  { id: 'm10k',   goal: 10000,  label: '<strong>10.000 pontos</strong>',   reward: 'Multiplicador ×2 de 30s', bonus: () => applyTempMult(2, 30) },
+  { id: 'm50k',   goal: 50000,  label: '<strong>50.000 pontos</strong>',   reward: '+5.000 pontos bônus', bonus: () => addScore(5000) },
+  { id: 'c100',   goal: 100,    label: '<strong>100 cliques</strong> totais', reward: '+30 pontos',    bonus: () => addScore(30), clicker: true },
+  { id: 'c500',   goal: 500,    label: '<strong>500 cliques</strong> totais', reward: '+100 pontos',   bonus: () => addScore(100), clicker: true },
+  { id: 'c1k',    goal: 1000,   label: '<strong>1.000 cliques</strong> totais', reward: '+300 pontos', bonus: () => addScore(300), clicker: true },
+];
+
+const doneMilestones = new Set();
+
+// ================================
+// CORE CLICK
+// ================================
+function doClick(e) {
+  const now = Date.now();
+  let pts = clickPower;
+
+  // Lucky
+  if (owned.has('lucky') && Math.random() < 0.10) {
+    pts *= 10;
+    spawnFx(e, `LUCKY! ×10`, '#00ff88', e.clientX, e.clientY - 20);
+  }
+  // Critical
+  if (owned.has('critical') && Math.random() < 0.15) {
+    pts += 100;
+    spawnFx(e, `CRÍTICO! +100`, '#ff2244', e.clientX, e.clientY - 30);
+  }
+  // Combo
+  if (owned.has('combo')) {
+    if (now - lastClickTime < 600) {
+      comboCount = Math.min(comboCount + 1, 20);
+    } else {
+      comboCount = 1;
+    }
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => {
+      comboCount = 0;
+      updateComboDisplay();
+    }, 1200);
+    pts = Math.floor(pts * (1 + comboCount * 0.1));
+    updateComboDisplay();
+  }
+
+  // Apply global multiplier
+  const mult = globalMult * (tempMultVal > 1 && Date.now() < tempMultExpiry ? tempMultVal : 1);
+  pts = Math.floor(pts * mult);
+
+  addScore(pts);
+  totalClicks++;
+  lastClickTime = now;
+
+  // Floating text
+  const color = pts > clickPower * 5 ? '#ff4400' : pts > clickPower * 2 ? '#ffdd00' : '#ffffff';
+  spawnFx(e, `+${pts}`, color, e.clientX, e.clientY);
+
+  // Button pop
+  const btn = document.getElementById('scoreNum');
+  btn.classList.remove('pop');
+  void btn.offsetWidth;
+  btn.classList.add('pop');
+
+  // Button emoji cycle
+  const emojis = ['👆','✊','🤜','⚡','👊','🫳','☝️'];
+  document.getElementById('btnEmoji').textContent = emojis[totalClicks % emojis.length];
+
+  updateUI();
+  checkMilestones();
+}
+
+function addScore(pts) {
+  score += pts;
+  if (score < 0) score = 0;
+}
+
+function spawnFx(e, text, color, x, y) {
+  const el = document.createElement('div');
+  el.className = 'click-fx';
+  el.textContent = text;
+  el.style.cssText = `left:${x - 20}px;top:${y - 10}px;color:${color};font-size:${Math.min(1.2, .7 + text.length * .02)}rem;font-family:'Boogaloo',cursive;`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 750);
+}
+
+// ================================
+// AUTO PER SECOND
+// ================================
+setInterval(() => {
+  if (autoPerSec > 0) {
+    const mult = globalMult * (tempMultVal > 1 && Date.now() < tempMultExpiry ? tempMultVal : 1);
+    addScore(Math.floor(autoPerSec * mult));
+    updateUI();
+    checkMilestones();
+  }
+}, 1000);
+
+// ================================
+// TEMP EFFECTS
+// ================================
+function applyTempMult(val, secs) {
+  const dur = secs + RAINBOW_BONUS;
+  tempMultVal = Math.max(tempMultVal, val);
+  tempMultExpiry = Date.now() + dur * 1000;
+  toast(`💥 ×${val} ativado por ${dur}s!`);
+  renderActiveStrip();
+  setTimeout(() => {
+    tempMultVal = 1;
+    renderActiveStrip();
+    updateUI();
+  }, dur * 1000);
+}
+
+function startTempEffect(id, secs, msg) {
+  const dur = secs + RAINBOW_BONUS;
+  activeBoosts[id] = Date.now() + dur * 1000;
+  toast(msg);
+  renderActiveStrip();
+  setTimeout(() => { delete activeBoosts[id]; renderActiveStrip(); }, dur * 1000);
+}
+
+function startTempAuto(perSec, secs) {
+  const dur = secs + RAINBOW_BONUS;
+  autoPerSec += perSec;
+  toast(`⛈️ +${perSec}/seg por ${dur}s!`);
+  setTimeout(() => { autoPerSec = Math.max(0, autoPerSec - perSec); updateUI(); }, dur * 1000);
+}
+
+function startGhostClick() {
+  if (ghostIv) return;
+  ghostIv = setInterval(() => {
+    const pts = Math.floor(clickPower * globalMult);
+    addScore(pts);
+    updateUI();
+    checkMilestones();
+  }, 2000);
+}
+
+// ================================
+// BUY BOOST
+// ================================
+function buyBoost(id) {
+  const boost = BOOSTS.find(b => b.id === id);
+  if (!boost) return;
+  if (owned.has(id) && boost.type !== 'instant' && boost.type !== 'temp') {
+    toast('✅ Já comprado!'); return;
+  }
+  if (boost.requires && !owned.has(boost.requires)) {
+    toast('🔒 Desbloqueie o anterior primeiro!'); return;
+  }
+  if (score < boost.cost) {
+    toast(`❌ Precisa de ${boost.cost} pontos!`); return;
+  }
+  score -= boost.cost;
+  if (boost.type !== 'instant') owned.add(id);
+  boost.effect();
+  updateUI();
+  renderBoosts();
+  checkMilestones();
+  toast(`✨ ${boost.name} ativado!`);
+}
+
+// ================================
+// TEMP MULT DISPLAY COUNTDOWN
+// ================================
+setInterval(() => {
+  renderActiveStrip();
+  updateUI();
+}, 1000);
+
+// ================================
+// UI RENDERS
+// ================================
+function updateUI() {
+  document.getElementById('scoreNum').textContent = formatNum(score);
+  document.getElementById('statTotal').textContent = formatNum(totalClicks);
+  document.getElementById('statBoosts').textContent = owned.size;
+  const mult = globalMult * (tempMultVal > 1 && Date.now() < tempMultExpiry ? tempMultVal : 1);
+  document.getElementById('statMulti').textContent = '×' + (mult % 1 === 0 ? mult : mult.toFixed(1));
+  document.getElementById('statCps').textContent = formatNum(autoPerSec);
+  document.getElementById('cpsDisplay').textContent = `+${clickPower} por clique${autoPerSec > 0 ? ` • +${autoPerSec}/seg` : ''}`;
+  document.getElementById('perClickLabel').textContent = `+${clickPower} por clique`;
+}
+
+function formatNum(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return Math.floor(n).toString();
+}
+
+function renderBoosts() {
+  const grid = document.getElementById('boostGrid');
+  grid.innerHTML = '';
+  BOOSTS.forEach(b => {
+    const isOwned = owned.has(b.id);
+    const locked = b.requires && !owned.has(b.requires);
+    const canBuy = !locked && (score >= b.cost || isOwned);
+
+    const d = document.createElement('div');
+    d.className = 'boost-card' + (locked ? ' locked' : '') + (isOwned && b.type === 'perm' ? ' owned' : '');
+    d.style.borderColor = isOwned && b.type === 'perm' ? 'var(--green)' : (canBuy ? b.borderColor : 'var(--border)');
+    d.innerHTML = `
+      <div class="boost-mult" style="color:${b.color}">${b.label}</div>
+      <span class="boost-icon">${b.icon}</span>
+      <div class="boost-name">${b.name}</div>
+      <div class="boost-desc">${b.desc}</div>
+      <div class="boost-cost" style="color:${canBuy || isOwned ? b.color : 'var(--sub)'}">
+        ${isOwned && b.type === 'perm' ? '<span style="color:var(--green)">✓ ATIVO</span>' : `⚡ ${b.cost} pts`}
+      </div>
+    `;
+    if (!locked && !(isOwned && b.type === 'perm')) {
+      d.onclick = () => buyBoost(b.id);
+    }
+    grid.appendChild(d);
+  });
+}
+
+function renderActiveStrip() {
+  const strip = document.getElementById('activeStrip');
+  strip.innerHTML = '';
+
+  // temp mult
+  if (tempMultVal > 1 && Date.now() < tempMultExpiry) {
+    const rem = Math.ceil((tempMultExpiry - Date.now()) / 1000);
+    const chip = document.createElement('div');
+    chip.className = 'active-chip';
+    chip.style.cssText = `color:var(--yellow);border-color:#886600;background:#1a1200;`;
+    chip.textContent = `×${tempMultVal} MULT -- ${rem}s`;
+    strip.appendChild(chip);
+  }
+  // other active
+  Object.entries(activeBoosts).forEach(([id, expiry]) => {
+    const rem = Math.ceil((expiry - Date.now()) / 1000);
+    if (rem <= 0) return;
+    const b = BOOSTS.find(x => x.id === id);
+    if (!b) return;
+    const chip = document.createElement('div');
+    chip.className = 'active-chip';
+    chip.style.cssText = `color:${b.color};border-color:${b.borderColor};background:var(--card);`;
+    chip.textContent = `${b.icon} ${b.name} -- ${rem}s`;
+    strip.appendChild(chip);
+  });
+  // permanent notable
+  if (owned.has('ghost')) {
+    const chip = document.createElement('div');
+    chip.className = 'active-chip';
+    chip.style.cssText = 'color:#aaaaff;border-color:#444488;background:var(--card);';
+    chip.textContent = '👻 FANTASMA ativo';
+    strip.appendChild(chip);
+  }
+}
+
+function updateComboDisplay() {
+  const el = document.getElementById('comboDisplay');
+  if (comboCount >= 3) {
+    el.textContent = `🔥 COMBO ×${(1 + comboCount * 0.1).toFixed(1)} (${comboCount} seguidos!)`;
+    el.className = 'combo-display active';
+  } else {
+    el.textContent = '';
+    el.className = 'combo-display';
+  }
+}
+
+// ================================
+// MILESTONES
+// ================================
+function buildMilestones() {
+  const list = document.getElementById('milestoneList');
+  list.innerHTML = '';
+  MILESTONES.forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'milestone-row' + (doneMilestones.has(m.id) ? ' done' : '');
+    d.id = 'ms-' + m.id;
+    const val = m.clicker ? totalClicks : score;
+    const pct = Math.min(100, Math.floor(val / m.goal * 100));
+    d.innerHTML = `
+      <div class="milestone-icon">${doneMilestones.has(m.id) ? '✅' : '🏆'}</div>
+      <div style="flex:1">
+        <div class="milestone-text">${m.label} ${m.clicker ? '(cliques)' : ''}</div>
+        <div style="height:4px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent2),var(--green));border-radius:2px;transition:width .4s;"></div>
+        </div>
+      </div>
+      <div class="milestone-reward">${m.reward}</div>
+      <div class="milestone-check">${doneMilestones.has(m.id) ? '✓' : ''}</div>
+    `;
+    list.appendChild(d);
+  });
+}
+
+function checkMilestones() {
+  MILESTONES.forEach(m => {
+    if (doneMilestones.has(m.id)) return;
+    const val = m.clicker ? totalClicks : score;
+    if (val >= m.goal) {
+      doneMilestones.add(m.id);
+      m.bonus();
+      toast(`🏆 CONQUISTA: ${m.label.replace(/<[^>]+>/g,'')}! ${m.reward}`);
+      buildMilestones();
+    }
+  });
+  // refresh progress bars
+  MILESTONES.forEach(m => {
+    const el = document.getElementById('ms-' + m.id);
+    if (!el || doneMilestones.has(m.id)) return;
+    const val = m.clicker ? totalClicks : score;
+    const pct = Math.min(100, Math.floor(val / m.goal * 100));
+    const bar = el.querySelector('div div div');
+    if (bar) bar.style.width = pct + '%';
+  });
+}
+
+// ================================
+// TOAST
+// ================================
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ================================
+// SOUND SYSTEM (Web Audio API)
+// ================================
+let _ac;
+function getAC() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  if (_ac.state === 'suspended') _ac.resume();
+  return _ac;
+}
+function tone(freq, dur = 0.1, type = 'sine', vol = 0.15, delay = 0) {
+  try {
+    const a = getAC(), o = a.createOscillator(), g = a.createGain();
+    o.connect(g); g.connect(a.destination);
+    o.type = type;
+    o.frequency.setValueAtTime(freq, a.currentTime + delay);
+    g.gain.setValueAtTime(vol, a.currentTime + delay);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + delay + dur);
+    o.start(a.currentTime + delay);
+    o.stop(a.currentTime + delay + dur);
+  } catch(e) {}
+}
+function sfx(name) {
+  const S = {
+    // clique normal
+    click:     () => { tone(440, .05, 'sine', .12); tone(660, .06, 'sine', .1, .04); },
+    // clique lucky (especial)
+    lucky:     () => { [880,1100,1320,1540].forEach((f,i) => tone(f,.08,'sine',.15,i*.05)); },
+    // clique crítico
+    crit:      () => { tone(200,.05,'sawtooth',.1); tone(880,.15,'sine',.2,.04); },
+    // comprar boost
+    buy:       () => { [440,550,660,770,880].forEach((f,i) => tone(f,.08,'square',.1,i*.05)); },
+    // boost já comprado / erro
+    error:     () => { tone(220,.15,'sawtooth',.15); tone(180,.15,'sawtooth',.1,.08); },
+    // conquista desbloqueada
+    milestone: () => { [523,659,784,880,1046,1318].forEach((f,i) => tone(f,.12,'sine',.18,i*.07)); },
+    // multiplicador ativado
+    mult:      () => { tone(330,.08,'triangle',.12); tone(660,.08,'triangle',.15,.09); tone(990,.15,'triangle',.18,.18); },
+    // auto-clique fantasma
+    ghost:     () => { tone(220,.06,'sine',.06); },
+    // jackpot
+    jackpot:   () => { [440,550,660,880,1100,1320].forEach((f,i) => tone(f,.1,'sine',.18,i*.06)); },
+    // banco de pontos
+    bank:      () => { tone(660,.07,'sine',.12); tone(880,.1,'sine',.15,.08); },
+    // tempestade
+    storm:     () => { tone(150,.3,'sawtooth',.08); tone(300,.2,'square',.06,.15); },
+    // coffee
+    coffee:    () => { tone(880,.05,'sine',.1); tone(1100,.05,'sine',.1,.06); tone(1320,.08,'sine',.1,.12); },
+    // combo
+    combo:     () => { const c = Math.min(comboCount, 10); tone(440+c*40,.06,'sine',.12); },
+    // botão WEN / vídeo
+    wen:       () => { [880,1100,1320].forEach((f,i) => tone(f,.1,'sine',.2,i*.09)); },
+    // botão planta
+    planta:    () => { [440,550,660].forEach((f,i) => tone(f,.1,'triangle',.15,i*.08)); },
+    // toast genérico
+    toast:     () => { tone(660,.06,'sine',.1); tone(880,.08,'sine',.1,.07); },
+    // hover boost
+    hover:     () => { tone(880,.03,'sine',.04); },
+  };
+  if (S[name]) S[name]();
+}
+
+// ── Hook sounds into game events ──
+// Click principal
+const _origDoClick = doClick;
+doClick = (e) => { sfx('click'); _origDoClick(e); };
+
+// Toast
+const _origToast = toast;
+toast = (msg) => {
+  if (msg.includes('CONQUISTA')) sfx('milestone');
+  else if (msg.includes('JACKPOT')) sfx('jackpot');
+  else if (msg.includes('banco') || msg.includes('Banco')) sfx('bank');
+  else if (msg.includes('×')) sfx('mult');
+  else if (msg.includes('BEANS') || msg.includes('beans')) sfx('bank');
+  else sfx('toast');
+  _origToast(msg);
+};
+
+// Buy boost sounds
+const _origBuyBoost = buyBoost;
+buyBoost = (id) => {
+  const boost = BOOSTS.find(b => b.id === id);
+  if (!boost) return;
+  if (score < boost.cost && !owned.has(id)) { sfx('error'); _origBuyBoost(id); return; }
+  const isJackpot = id === 'jackpot';
+  const isCoffee  = id === 'coffee';
+  const isStorm   = id === 'storm';
+  if (isJackpot) sfx('jackpot');
+  else if (isCoffee) sfx('coffee');
+  else if (isStorm) sfx('storm');
+  else sfx('buy');
+  _origBuyBoost(id);
+};
+
+// Hover on boost cards
+document.addEventListener('mouseover', e => {
+  if (e.target.closest('.boost-card:not(.locked)')) sfx('hover');
+});
+
+// Ghost auto-click sound
+const _origStartGhost = startGhostClick;
+startGhostClick = () => {
+  _origStartGhost();
+  // override interval to add sound
+  clearInterval(ghostIv);
+  ghostIv = setInterval(() => {
+    const pts = Math.floor(clickPower * globalMult);
+    addScore(pts); sfx('ghost');
+    updateUI(); checkMilestones();
+  }, 2000);
+};
+
+// ================================
+// INIT
+// ================================
+renderBoosts();
+buildMilestones();
+updateUI();
+
+setTimeout(() => toast('⚡ Clique no botão e compre boosts!'), 800);
+
+// == ULTRA ABANDONADO ==
+(function initAbandoned(){
+  // Error banner
+  const banner = document.createElement('div');
+  banner.id = 'error-banner';
+  const errs = [
+    'ERRO 0x0000007E -- SISTEMA_THREAD_EXCEPTION_NOT_HANDLED',
+    'AVISO: Arquivo corrompido detectado -- dados parcialmente recuperados',
+    'FALHA DE MEMÓRIA -- Última sessão: DESCONHECIDA',
+    'ERRO CRÍTICO: clickmaster.exe parou de responder',
+    'DADOS CORROMPIDOS -- Recuperação: 23% concluída',
+  ];
+  banner.innerHTML = '<span>' + errs[Math.floor(Math.random()*errs.length)] + '</span><span>■□□□□□□□□□ 12%</span>';
+  document.body.prepend(banner);
+
+  // Cantos quebrados
+  const c1 = document.createElement('div'); c1.id = 'corner-break'; document.body.appendChild(c1);
+  const c2 = document.createElement('div'); c2.id = 'corner-break2'; document.body.appendChild(c2);
+  const vig = document.createElement('div'); vig.id = 'vignette-abandoned'; document.body.appendChild(vig);
+
+  // Riscos na tela
+  const scratchData = [
+    {x:15,y:5,w:2,h:45,r:-15},{x:65,y:10,w:1,h:60,r:8},
+    {x:80,y:0,w:1,h:35,r:-5},{x:30,y:50,w:1,h:30,r:20},
+    {x:50,y:30,w:2,h:25,r:-10},{x:90,y:20,w:1,h:40,r:5},
+  ];
+  scratchData.forEach(s=>{
+    const el=document.createElement('div');el.className='scratch';
+    el.style.cssText=`left:${s.x}%;top:${s.y}%;width:${s.w}px;height:${s.h}%;transform:rotate(${s.r}deg);`;
+    document.body.appendChild(el);
+  });
+
+  // Manchas de umidade
+  [[8,15,280,320],[75,55,200,250],[45,80,180,200],[90,10,150,170],[20,65,220,240]].forEach(([x,y,w,h])=>{
+    const st=document.createElement('div');st.className='stain';
+    st.style.cssText=`left:${x}%;top:${y}%;width:${w}px;height:${h}px;`;
+    document.body.appendChild(st);
+  });
+
+  // Poeira
+  for(let i=0;i<50;i++){
+    const d=document.createElement('div');d.className='dust';
+    const size=1+Math.random()*4;
+    d.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;animation-duration:${10+Math.random()*25}s;animation-delay:${Math.random()*20}s;`;
+    d.style.setProperty('--dx',(Math.random()-.5)*300+'px');
+    d.style.setProperty('--dy',(-80-Math.random()*200)+'px');
+    document.body.appendChild(d);
+  }
+
+  // Glitch lines periódicas
+  setInterval(()=>{
+    const g=document.createElement('div');
+    g.style.cssText=`position:fixed;left:0;right:0;z-index:9989;pointer-events:none;height:${1+Math.random()*3}px;top:${Math.random()*100}%;background:rgba(${Math.random()>.5?'150,50,200':'50,150,200'},.25);animation:none;`;
+    document.body.appendChild(g);
+    setTimeout(()=>g.remove(),300+Math.random()*600);
+  },600+Math.random()*800);
+
+  // Título corrompido
+  const titleEl = document.querySelector('h1') || document.querySelector('header > *') || document.querySelector('.game-title');
+  const CORRUPT_CHARS = '▓░▒█▄▀■□▪▫◆◇'.split('');
+  if(titleEl){
+    setInterval(()=>{
+      if(Math.random()<.2){
+        const orig=titleEl.textContent;
+        titleEl.textContent=orig.split('').map(c=>Math.random()<.15?CORRUPT_CHARS[Math.floor(Math.random()*CORRUPT_CHARS.length)]:c).join('');
+        setTimeout(()=>titleEl.textContent=orig,120);
+      }
+    },2500);
+  }
+
+  // Tela preta ocasional (como tela apagando)
+  setInterval(()=>{
+    if(Math.random()<.08){
+      document.body.style.opacity='0';
+      setTimeout(()=>{document.body.style.opacity='';},80+Math.random()*150);
+    }
+  },5000);
+
+  // Mensagem de erro no console estilo sistema antigo
+  console.warn('%c[SISTEMA ABANDONADO]%c Última modificação: DESCONHECIDA
+Arquivos corrompidos: 47
+Estado: DETERIORANDO','color:#550077;font-weight:bold','color:#333');
+})();
+
+</script>
+
+<footer>⚡ CLICKER SUPREMO -- Jonathan & Willian · Claude AI</footer>
+</body>
+</html>
